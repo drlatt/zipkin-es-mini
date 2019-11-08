@@ -1,0 +1,39 @@
+# connect to a running elasticsearch instance
+version: '2'
+
+services:
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    # Environment settings are defined here https://github.com/openzipkin/zipkin/blob/master/zipkin-server/README.md#environment-variables
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=elasticsearch:9200
+      # - ES_USERNAME=#####
+      # - ES_PASSWORD=#####
+    ports:
+      - "127.0.0.1:9411:9411"
+    networks:
+      - local_default
+    external_links:
+      - elasticsearch
+
+  dependencies:
+    image: openzipkin/zipkin-dependencies
+    container_name: dependencies
+    entrypoint: crond -f
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=elasticsearch:9200
+      # - ES_USERNAME=#####
+      # - ES_PASSWORD=#####
+      # - JAVA_OPTS=-verbose:gc -Xms1G -Xmx1G
+    external_links:
+      - elasticsearch
+    networks:
+      - local_default
+
+networks:
+  local_default:
+    external: true
+      
